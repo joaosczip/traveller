@@ -61,6 +61,22 @@ Traveller is a modern FastAPI-based backend application designed to assist trave
 - **Currency Conversion**: Ask for conversions between BRL, EUR, and USD.
 - **Translation**: Ask for translations between Brazilian Portuguese and Spanish (Spain).
 
+### Example: Translation
+
+```sh
+curl -X POST 'http://localhost:8000/questions' \
+  -H 'Content-Type: application/json' \
+  -d '{"input": "Cerveja"}'
+```
+
+### Example: Currency Converter
+
+```sh
+curl -X POST 'http://localhost:8000/questions' \
+  -H 'Content-Type: application/json' \
+  -d '{"input": "54.2 EUR"}'
+```
+
 ## Development
 
 - **Lint**: `make lint`
