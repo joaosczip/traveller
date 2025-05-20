@@ -1,14 +1,13 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
-
 from src.chains.app import app_chain
 
 app = FastAPI()
 
 
-@app.get("/hello")
-def hello_world():
-    return {"message": "Hello, world!"}
+@app.get("/healthz")
+def health_check():
+    return {"status": "ok", "timestamp": __import__("datetime").datetime.utcnow().isoformat()}
 
 
 class QuestionRequest(BaseModel):

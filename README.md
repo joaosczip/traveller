@@ -56,7 +56,7 @@ Traveller is a modern FastAPI-based backend application designed to assist trave
 
 ## Usage
 
-- **Hello World**: `GET /hello`
+- **Health Check**: `GET /healthz` — returns `{ "status": "ok", "timestamp": "..." }`
 - **Ask a Question**: `POST /questions` with JSON body `{ "input": "your question here" }`
 - **Currency Conversion**: Ask for conversions between BRL, EUR, and USD.
 - **Translation**: Ask for translations between Brazilian Portuguese and Spanish (Spain).
