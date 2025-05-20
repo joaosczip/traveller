@@ -1,5 +1,7 @@
 # Traveller
 
+> **Work in Progress:** Traveller is under active development! Exciting features are coming soon—see the roadmap below.
+
 Traveller is a modern, LLM-driven FastAPI backend application designed to assist travelers with two main features:
 
 - **Currency Conversion**: Convert between BRL (Brazilian Real) and EUR (Euro) using real-time exchange rates, with smart caching for performance.
@@ -14,6 +16,12 @@ Traveller leverages advanced Large Language Model (LLM) capabilities, including:
 - **LangChain Integration**: Built on top of LangChain, the app orchestrates LLMs, prompt templates, output parsers, and tool routing for robust, extensible AI-driven logic.
 
 This makes Traveller a powerful, extensible, and intelligent assistant for travelers, powered by state-of-the-art LLM technology.
+
+## Roadmap
+
+- 🚀 **WhatsApp Integration:** Fully integrate with WhatsApp to allow seamless communication with the assistant.
+- 🌍 **More Languages & Currencies:** Expand support for additional languages and currencies.
+- ✈️ **Travel Search & Booking:** Enable flight and train price search and booking directly from the app.
 
 ## Features
 
