@@ -1,0 +1,36 @@
+[tool.poetry]
+name = "traveller"
+version = "0.1.0"
+description = "An AI bot to help you with your trips"
+authors = ["João Guilherme <joao.sczip@hotmail.com>"]
+package-mode = false
+
+[tool.poetry.dependencies]
+python = ">=3.9,<4.0"
+fastapi = "^0.115.12"
+uvicorn = {extras = ["standard"], version = "^0.34.2"}
+pydantic = "^2.11.4"
+python-dotenv = "^1.1.0"
+langchain-community = "^0.3.24"
+langchain = "^0.3.25"
+langchain-ollama = "^0.3.3"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.5"
+httpx = "^0.28.1"
+ruff = "^0.11.10"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+start = "traveller.main:app"
+
+[tool.ruff]
+line-length = 120
+exclude = ["__pycache__/"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W"]
+ignore = []
