@@ -1,9 +1,19 @@
 # Traveller
 
-Traveller is a modern FastAPI-based backend application designed to assist travelers with two main features:
+Traveller is a modern, LLM-driven FastAPI backend application designed to assist travelers with two main features:
 
 - **Currency Conversion**: Convert between BRL (Brazilian Real) and EUR (Euro) using real-time exchange rates, with smart caching for performance.
 - **Translation**: Translate between Brazilian Portuguese and Spanish (Spain), with clear instructions and concise responses.
+
+## LLM-Driven Features
+
+Traveller leverages advanced Large Language Model (LLM) capabilities, including:
+
+- **Tool-Calling**: The app uses LLM tool-calling to dynamically invoke specialized functions (tools) for tasks like currency conversion, based on user intent.
+- **Chaining**: Complex workflows are handled by chaining multiple LLM and tool calls together, enabling context-aware, multi-step reasoning and responses.
+- **LangChain Integration**: Built on top of LangChain, the app orchestrates LLMs, prompt templates, output parsers, and tool routing for robust, extensible AI-driven logic.
+
+This makes Traveller a powerful, extensible, and intelligent assistant for travelers, powered by state-of-the-art LLM technology.
 
 ## Features
 
