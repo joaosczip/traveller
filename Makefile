@@ -6,3 +6,6 @@ test:
 
 lint:
 	poetry run ruff check src
+
+start-redis:
+	docker compose up -d redis

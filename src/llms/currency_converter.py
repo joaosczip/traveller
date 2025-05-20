@@ -1,6 +1,7 @@
 from decimal import Decimal, ROUND_CEILING
 from ..config import settings
 import httpx
+import json
 
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.messages import ToolMessage
@@ -9,18 +10,30 @@ from langchain_ollama import ChatOllama
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnableLambda
 
+from ..cache import redis
+
 
 async def fetch_rates():
-    exchange_rate_api_url = f"https://api.freecurrencyapi.com/v1/latest?apikey={settings.EXCHANGE_RATE_API_KEY}"
-    async with httpx.AsyncClient() as client:
-        response = await client.get(exchange_rate_api_url)
-        currencies = response.json()
+    cached = await redis.get(settings.CURRENCY_CACHE_KEY)
 
-    if "data" not in currencies:
-        raise ValueError("Invalid response from the currency API")
+    if cached:
+        currencies_data = json.loads(cached)
+    else:
+        exchange_rate_api_url = f"https://api.freecurrencyapi.com/v1/latest?apikey={settings.EXCHANGE_RATE_API_KEY}"
+        async with httpx.AsyncClient() as client:
+            response = await client.get(exchange_rate_api_url)
+            currencies = response.json()
 
-    currencies_data = currencies["data"]
+        if "data" not in currencies:
+            raise ValueError("Invalid response from the currency API")
 
+        currencies_data = currencies["data"]
+
+        await redis.set(
+            settings.CURRENCY_CACHE_KEY,
+            json.dumps(currencies_data),
+            ex=settings.CURRENCY_CACHE_EXPIRE_SECONDS,
+        )
     return {
         "BRL": Decimal(currencies_data["BRL"]),
         "EUR": Decimal(currencies_data["EUR"]),
