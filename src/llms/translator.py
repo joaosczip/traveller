@@ -50,5 +50,4 @@ prompt_template = ChatPromptTemplate.from_template(
 )
 
 
-def translator(model: str):
-    return prompt_template | ChatOllama(model=model) | StrOutputParser()
+translator_chain = prompt_template | ChatOllama(model="gemma3:12b") | StrOutputParser()

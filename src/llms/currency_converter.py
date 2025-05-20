@@ -103,13 +103,8 @@ tools = [
     eur_to_brl_converter,
 ]
 
+llm = ChatOllama(model="qwen2.5-coder:14b")
 
-def currency_converter(model: str):
-    llm = ChatOllama(model=model)
-
-    return (
-        prompt_template
-        | llm.bind_tools(tools=tools)
-        | RunnableLambda(invoke_currency_converter_tool)
-        | StrOutputParser()
-    )
+currency_converter_chain = (
+    prompt_template | llm.bind_tools(tools=tools) | RunnableLambda(invoke_currency_converter_tool) | StrOutputParser()
+)
