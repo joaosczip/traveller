@@ -17,5 +17,7 @@ class QuestionRequest(BaseModel):
 
 @app.post("/questions")
 async def questions(request: QuestionRequest):
-    result = app_chain.invoke({"input": request.input})
-    return result
+    result = await app_chain.ainvoke({"input": request.input})
+    if hasattr(result, "model_response"):
+        return {"model_response": result.model_response}
+    return {"model_response": result}
