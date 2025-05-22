@@ -4,16 +4,20 @@ from langchain_ollama import ChatOllama
 
 from ..llms.translator import translator_chain
 from ..llms.currency_converter import currency_converter_chain
+from ..llms.flights_seacher import search_flights_chain
 
 routing_chain = (
     ChatPromptTemplate.from_template(
         """
         ### Instructions
-        Given the traveller input, you must classify whether the they want to translate a word or a sentence,\n
-        or if they want to convert money exchange rates from one currency to another.
+        Given the traveller input, you must classify whether they want to one of the following actions to be performerd:
+            - translate a text from one language to another
+            - convert money exchange rates from one currency to another
+            - search for flights from one airport to another
 
         - When the traveller wants to translate, answer with "translation".
         - When the traveller wants to convert money exchange rates, answer with "currency_converter".
+        - When the traveller wants to search for flights, answer with "search_flights".
 
         Always respond with a single word, and do not add any other information.\n
         Do not answer with anything else, just the classification.\n
@@ -34,6 +38,11 @@ routing_chain = (
         [Classification]
         translation
 
+        [Traveller input]
+        I want to search for flights from CWB to GRU on March 1st, 2024.
+        [Classification]
+        search_flights
+
         Traveller input: {input}
         Classification:
     """
@@ -49,3 +58,5 @@ def invoke_chain(input):
         return translator_chain
     elif "currency_converter" in classification:
         return currency_converter_chain
+    elif "search_flights" in classification:
+        return search_flights_chain
