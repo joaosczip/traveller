@@ -1,3 +1,6 @@
+from datetime import datetime
+from dateutil import parser
+
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_ollama import ChatOllama
 from langchain_core.runnables import RunnableLambda
@@ -8,14 +11,33 @@ from fast_flights import FlightData, Passengers, Result as FlightResult, get_fli
 from ..models import ToolCall
 
 
+def flight_date_to_datetime(date_str: str) -> datetime:
+    """
+    Convert a flight date string to a datetime object.
+    Args:
+        date_str (str): The date string in the format `3:00 PM on Sun, Jun 1` to be converted.
+    Returns:
+        datetime: The converted datetime object.
+    """
+    try:
+        return parser.parse(date_str, fuzzy=True, default=None)
+    except ValueError:
+        raise ValueError(f"Invalid date format: {date_str}")
+
+
 class FlightResponse(BaseModel):
     name: str
     is_best: bool
     price: str
-    departure_date: str
-    arrival_date: str
+    departure_date: datetime
+    arrival_date: datetime
     duration: str
     stops: int
+    from_airport: str
+    to_airport: str
+    seat_type: str = "economy"
+    adults: int = 1
+    booking_url: str | None = None
 
 
 def invoke_search_flights_tool(ai_message: AIMessage) -> AIMessage:
@@ -55,16 +77,21 @@ def invoke_search_flights_tool(ai_message: AIMessage) -> AIMessage:
 
             response_content = []
             for flight in flight_result.flights[:results]:
-                flight = FlightResponse(
+                flight_response = FlightResponse(
                     name=flight.name,
+                    from_airport=from_airport,
+                    to_airport=to_airport,
                     is_best=flight.is_best,
                     price=flight.price,
-                    departure_date=flight.departure,
-                    arrival_date=flight.arrival,
+                    departure_date=flight_date_to_datetime(flight.departure),
+                    arrival_date=flight_date_to_datetime(flight.arrival),
                     duration=flight.duration,
                     stops=flight.stops,
+                    adults=adults,
                 )
-                response_content.append(flight.model_dump())
+                flight_response.booking_url = flight_response_to_url(flight_response)
+
+                response_content.append(flight_response.model_dump())
 
             return AIMessage(
                 content=response_content,
@@ -103,6 +130,30 @@ def _search_flights(
         passengers=passengers,
         fetch_mode="fallback",
     )
+
+
+def flight_response_to_url(flight: FlightResponse) -> str:
+    """
+    Convert a FlightResponse instance to a Booking.com flights URL.
+    """
+    base_url = "https://flights.booking.com/flights/"
+    params = [
+        "type=ONEWAY",
+        f"from={flight.from_airport}",
+        f"to={flight.to_airport}",
+        f"cabinClass={flight.seat_type.upper()}",
+        "sort=BEST",
+        f"depart={flight.departure_date.date()}",
+        f"adults={flight.adults}",
+        "gclsrc=gf",
+        "locale=en-us",
+        "salesCurrency=BRL",
+        "customerCurrency=BRL",
+        "aid=2215358",
+        "label=flights-booking-unknown",
+    ]
+    url = f"{base_url}{flight.from_airport}-{flight.to_airport}?{'&'.join(params)}"
+    return url
 
 
 class search_flights(BaseModel):
