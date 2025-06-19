@@ -1,12 +1,25 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
+from datetime import datetime
+from decimal import Decimal
 
 
-class ModelResponse(BaseModel):
-    model_response: str | dict | list = Field(description="The content of the response")
+class Flight(BaseModel):
+    from_airport: str
+    to_airport: str
+    departure_date: datetime
+    airline: str
+    price: Decimal
+    currency: str = "USD"
+    stops: int
+    duration_in_minutes: int
 
 
-class ToolCall(BaseModel):
-    id: str = Field(description="The unique identifier for the tool call")
-    name: str = Field(description="The name of the tool")
-    args: dict = Field(description="The arguments for the tool")
-    type: str | None = "tool_call"
+class Hotel(BaseModel):
+    name: str
+    address: str
+    check_in_date: str
+    check_out_date: str
+    price_per_night: Decimal
+    total_price: Decimal
+    currency: str = "USD"
+    rating: float

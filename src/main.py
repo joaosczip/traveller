@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
-from src.chains.app import app_chain
+from src.graph.traveller import build_graph
 
 app = FastAPI()
 
@@ -9,7 +9,9 @@ DEBUG = True
 
 @app.get("/healthz")
 def health_check():
-    return {"status": "ok", "timestamp": __import__("datetime").datetime.utcnow().isoformat()}
+    from datetime import datetime, timezone
+
+    return {"status": "ok", "timestamp": datetime.now(timezone.utc).isoformat()}
 
 
 class QuestionRequest(BaseModel):
@@ -18,11 +20,11 @@ class QuestionRequest(BaseModel):
 
 @app.post("/questions")
 async def questions(request: QuestionRequest):
-    result = await app_chain.ainvoke({"input": request.input})
+    traveller_graph = build_graph().compile()
+
+    result = traveller_graph.invoke({"trip_details": request.input})
 
     if DEBUG:
         print(f"Result: {result}")
 
-    if hasattr(result, "model_response"):
-        return {"model_response": result.model_response}
     return {"model_response": result}
