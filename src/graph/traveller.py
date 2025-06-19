@@ -1,7 +1,7 @@
 from langgraph.graph import StateGraph, START, END
 
 from .state import TravellerState, TravellerInputState, TravellerOutputState
-from ..nodes.flights_searcher.node import flights_search_node
+from ..nodes.flights_planner.node import flights_search_node
 
 
 def build_graph():

@@ -1,14 +1,14 @@
 from decimal import Decimal
 from datetime import datetime
 from unittest.mock import patch, MagicMock
-from src.nodes.flights_searcher.utils import parse_amount_currency, duration_to_minutes, parse_datetime_string
-from src.nodes.flights_searcher.tools import search_flights
+from src.nodes.flights_planner.utils import parse_amount_currency, duration_to_minutes, parse_datetime_string
+from src.nodes.flights_planner.tools import search_flights
 
 
 class TestSearchFlights:
     """Test cases for the search_flights function."""
 
-    @patch("src.nodes.flights_searcher.tools.get_flights")
+    @patch("src.nodes.flights_planner.tools.get_flights")
     def test_search_flights_return_multiple_found_flights(self, mock_get_flights):
         """Test flight search with multiple results."""
 
@@ -52,7 +52,7 @@ class TestSearchFlights:
         assert flight2.stops == 2
         assert flight2.duration_in_minutes == 300
 
-    @patch("src.nodes.flights_searcher.tools.get_flights")
+    @patch("src.nodes.flights_planner.tools.get_flights")
     def test_search_flights_limits_to_10_results(self, mock_get_flights):
         """Test that search_flights limits results to 10 flights."""
 
@@ -76,7 +76,7 @@ class TestSearchFlights:
         assert result[0].airline == "Airline 1"
         assert result[9].airline == "Airline 10"
 
-    @patch("src.nodes.flights_searcher.tools.get_flights")
+    @patch("src.nodes.flights_planner.tools.get_flights")
     def test_search_flights_empty_results(self, mock_get_flights):
         """Test flight search with no results."""
         mock_result = MagicMock()
@@ -98,7 +98,7 @@ class TestParseDatetimeString:
         expected = datetime(2025, 7, 1, 11, 40)
         assert result == expected
 
-    @patch("src.nodes.flights_searcher.utils.datetime")
+    @patch("src.nodes.flights_planner.utils.datetime")
     def test_parse_date_without_year_adds_current_year(self, mock_datetime):
         """Test parsing date string without year adds current year."""
         mock_datetime.now.return_value = datetime(2025, 6, 18, 12, 0, 0)
@@ -107,7 +107,7 @@ class TestParseDatetimeString:
         expected = datetime(2025, 7, 1, 11, 40)
         assert result == expected
 
-    @patch("src.nodes.flights_searcher.utils.datetime")
+    @patch("src.nodes.flights_planner.utils.datetime")
     def test_parse_date_with_weekday_no_year(self, mock_datetime):
         """Test parsing date string without year adds current year."""
         mock_datetime.now.return_value = datetime(2025, 6, 18, 12, 0, 0)
