@@ -16,12 +16,12 @@ def health_check():
     return {"status": "ok", "timestamp": datetime.now(timezone.utc).isoformat()}
 
 
-class QuestionRequest(BaseModel):
-    input: str
+class TripPlanningRequest(BaseModel):
+    trip_details: str
 
 
-@app.post("/questions")
-async def questions(request: QuestionRequest):
+@app.post("/trip/planning")
+async def trip_planning(request: TripPlanningRequest):
     traveller_graph = compile_with_checkpointer()
 
     config = {
@@ -29,7 +29,9 @@ async def questions(request: QuestionRequest):
     }
 
     def event_stream():
-        for step in traveller_graph.stream({"trip_details": request.input}, config=config, stream_mode="updates"):
+        for step in traveller_graph.stream(
+            {"trip_details": request.trip_details}, config=config, stream_mode="updates"
+        ):
             current_node = list(step.keys())[0]
             current_node_values = list(step.values())[0]
 
