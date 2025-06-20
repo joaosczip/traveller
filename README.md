@@ -1,35 +1,58 @@
 # Traveller
 
-> **Work in Progress:** Traveller is under active development! Exciting features are coming soon—see the roadmap below.
+> **Work in Progress:** Traveller is under active development.
 
-Traveller is a modern, LLM-driven FastAPI backend application designed to assist travelers with two main features:
+Traveller is a modern, AI-powered FastAPI backend application designed to assist travelers with intelligent trip planning and booking assistance. The application leverages Large Language Models (LLMs) and graph-based workflows to provide personalized travel recommendations.
 
-- **Currency Conversion**: Convert between BRL (Brazilian Real) and EUR (Euro) using real-time exchange rates, with smart caching for performance.
-- **Translation**: Translate between Brazilian Portuguese and Spanish (Spain), with clear instructions and concise responses.
+## Core Features
 
-## LLM-Driven Features
+### 🛫 **Flight Planning & Search**
 
-Traveller leverages advanced Large Language Model (LLM) capabilities, including:
+- **Intelligent Flight Search**: Find flights based on natural language requests
+- **Smart Ranking**: Automatically ranks flights by price, convenience, and travel time
+- **Real-time Streaming**: Get live updates as the system searches and processes your request
+- **Multi-airport Support**: Supports major airport codes (CWB, GRU, etc.)
 
-- **Tool-Calling**: The app uses LLM tool-calling to dynamically invoke specialized functions (tools) for tasks like currency conversion, based on user intent.
-- **Chaining**: Complex workflows are handled by chaining multiple LLM and tool calls together, enabling context-aware, multi-step reasoning and responses.
-- **LangChain Integration**: Built on top of LangChain, the app orchestrates LLMs, prompt templates, output parsers, and tool routing for robust, extensible AI-driven logic.
+### 💱 **Currency Conversion**
 
-This makes Traveller a powerful, extensible, and intelligent assistant for travelers, powered by state-of-the-art LLM technology.
+TODO
+
+### 🌍 **Translation Services**
+
+TODO
+
+## LLM-Driven Architecture
+
+Traveller leverages advanced AI and graph-based processing capabilities:
+
+- **LangGraph Workflows**: Uses LangGraph to orchestrate complex, multi-step travel planning workflows with state management
+- **Tool-Calling**: Dynamic invocation of specialized functions (flight search, ranking, booking) based on user intent
+- **Streaming Responses**: Real-time Server-Sent Events (SSE) for live progress updates during flight searches
+- **State Persistence**: Maintains conversation context and workflow state using checkpointers
+- **LangChain Integration**: Built on LangChain for robust prompt engineering, output parsing, and tool orchestration
+
+This creates an intelligent, context-aware travel assistant that can handle complex, multi-step planning requests with real-time feedback.
 
 ## Roadmap
 
-- 🚀 **WhatsApp Integration:** Fully integrate with WhatsApp to allow seamless communication with the assistant.
-- 🌍 **More Languages & Currencies:** Expand support for additional languages and currencies.
-- ✈️ **Travel Search & Booking:** Enable flight and train price search and booking directly from the app.
+- ✅ **Flight Search & Ranking:** Real-time flight search with intelligent ranking (Completed)
+- 🚀 **WhatsApp Integration:** Fully integrate with WhatsApp for seamless communication
+- 🌍 **More Languages & Currencies:** Expand support for additional languages and currencies
+- 🏨 **Hotel Search:** Add hotel booking and recommendations
+- 🚂 **Train & Bus Search:** Expand to other transportation modes
 
 ## Features
 
-- **FastAPI**: High-performance Python web framework for building APIs.
-- **LangChain**: Advanced language model chains for translation and classification.
-- **Async Currency Conversion**: Uses external APIs and Redis caching for fast, up-to-date rates.
-- **Dockerized Redis**: Easy setup for caching with Docker Compose.
-- **Ruff & Pytest**: Linting and testing for code quality.
+- **FastAPI**: High-performance Python web framework with async support for building APIs
+- **LangGraph**: Advanced graph-based workflow orchestration for complex travel planning logic
+- **LangChain**: Language model chains for translation, classification, and intelligent responses
+- **Flight Search Integration**: Real-time flight data using fast-flights library
+- **Streaming Responses**: Server-Sent Events (SSE) for real-time progress updates
+- **Redis Caching**: Fast caching layer for currency rates and flight data
+- **State Management**: Persistent conversation state with checkpointers
+- **Dockerized Services**: Easy setup with Docker Compose for Redis and other services
+- **Type Safety**: Full Pydantic models for request/response validation
+- **Testing Suite**: Comprehensive pytest suite with mocking and coverage reporting
 
 ## Requirements
 
@@ -72,49 +95,192 @@ This makes Traveller a powerful, extensible, and intelligent assistant for trave
    poetry run uvicorn src.main:app --reload
    ```
 
-## Usage
+## API Endpoints
 
-- **Health Check**: `GET /healthz` — returns `{ "status": "ok", "timestamp": "..." }`
-- **Ask a Question**: `POST /questions` with JSON body `{ "input": "your question here" }`
-- **Currency Conversion**: Ask for conversions between BRL, EUR, and USD.
-- **Translation**: Ask for translations between Brazilian Portuguese and Spanish (Spain).
+### Health Check
 
-### Example: Translation
+- **GET** `/healthz` — System health status
+  ```json
+  { "status": "ok", "timestamp": "2025-06-20T10:30:00.000Z" }
+  ```
 
-```sh
-curl -X POST 'http://localhost:8000/questions' \
-  -H 'Content-Type: application/json' \
-  -d '{"input": "Cerveja"}'
+### Trip Planning (Streaming)
+
+- **POST** `/trip/planning` — Intelligent trip planning with real-time updates
+
+**Request:**
+
+```json
+{
+  "trip_details": "I want to travel from CWB to GRU on August 1st, 2025. I will be travelling alone"
+}
 ```
 
-### Example: Currency Converter
+**Response:** Server-Sent Events stream with JSON chunks:
 
-```sh
-curl -X POST 'http://localhost:8000/questions' \
+1. **Flight Search Progress:**
+
+```json
+{
+  "response": "Found 10 flights options. I will rank them and return the best options for you"
+}
+```
+
+2. **Ranked Flight Results:**
+
+```json
+{
+  "response": "Here are the top ranked flights based on your preferences.",
+  "flights": [
+    {
+      "from_airport": "CWB",
+      "to_airport": "GRU",
+      "departure_date": "2025-08-01T05:20:00",
+      "airline": "LATAM",
+      "price": "155",
+      "currency": "BRL",
+      "stops": 0,
+      "duration_in_minutes": 65
+    }
+  ]
+}
+```
+
+## Usage Examples
+
+### Flight Search
+
+```bash
+curl -X POST 'http://localhost:8000/trip/planning' \
   -H 'Content-Type: application/json' \
-  -d '{"input": "54.2 EUR"}'
+  --data-raw '{"trip_details": "I want to travel from CWB to GRU on August 1st, 2025. I will be travelling alone"}' \
+  --no-buffer
+```
+
+### Streaming Response Example
+
+The flight planning endpoint returns a streaming response. Here's how to handle it in JavaScript:
+
+```javascript
+const response = await fetch("/trip/planning", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    trip_details: "Flight from CWB to GRU on August 1st",
+  }),
+});
+
+const reader = response.body.getReader();
+const decoder = new TextDecoder();
+
+while (true) {
+  const { value, done } = await reader.read();
+  if (done) break;
+
+  const chunk = decoder.decode(value);
+  const data = JSON.parse(chunk);
+
+  if (data.flights) {
+    console.log("Flights found:", data.flights);
+  } else {
+    console.log("Progress:", data.response);
+  }
+}
 ```
 
 ## Development
 
-- **Lint**: `make lint`
-- **Test**: `make test`
-- **Format on Save**: Enabled with Ruff in VS Code.
+### Available Commands
+
+- **Start Application**: `make start` or `poetry run uvicorn src.main:app --reload`
+- **Run Tests**: `make test` (runs all tests with verbose output)
+- **Test with Coverage**: `make test-coverage` (generates HTML coverage report)
+- **Watch Tests**: `make test-watch` (runs tests on file changes)
+- **Lint Code**: `make lint` (runs Ruff linting)
+- **Start Redis**: `make start-redis` (starts Redis with Docker Compose)
+
+### Testing
+
+The project includes a comprehensive test suite with:
+
+- Unit tests for all utility functions
+- Integration tests for flight search workflows
+- Mocked external dependencies for deterministic testing
+- Coverage reporting with HTML output
+
+```bash
+# Run all tests
+make test
+
+# Run tests with coverage
+make test-coverage
+
+# View coverage report
+open htmlcov/index.html
+```
 
 ## Project Structure
 
 ```
 src/
-  main.py            # FastAPI app and endpoints
-  config.py          # Pydantic settings
-  cache.py           # Redis client
-  chains/            # LangChain chains and routing
-  llms/              # LLM tools: currency_converter, translator
-  models.py          # Pydantic models
+  main.py                     # FastAPI app and streaming endpoints
+  config.py                   # Pydantic settings and configuration
+  cache.py                    # Redis client and caching utilities
+  models.py                   # Pydantic models (Flight, Hotel, etc.)
+  chains/                     # LangChain chains and routing logic
+    app.py                    # Main application chain
+    routing.py                # Request routing and classification
+  graph/                      # LangGraph workflow definitions
+    traveller.py              # Main traveller graph with checkpointer
+    state.py                  # Graph state models and schemas
+  nodes/                      # Graph workflow nodes
+    flights_planner/          # Flight planning node package
+      __init__.py             # Package initialization
+      tools.py                # Flight search tools and functions
+      utils.py                # Utility functions for flight processing
+      nodes.py                # Graph node implementations
+      llm.py                  # LLM integration for flight planning
+  llms/                       # LLM tools and integrations
+    currency_converter.py     # Currency conversion LLM tool
+    flights_searcher.py       # Flight search LLM integration
+    translator.py             # Translation LLM tool
+tests/                        # Test suite
+  test_flight_searcher.py     # Comprehensive flight search tests
+  test_main.py                # API endpoint tests
 ```
 
-## Notes
+## Technical Notes
 
-- Currency rates are cached in Redis for 1 hour for performance.
-- The app uses async everywhere for maximum performance.
-- Make sure your API key for currency rates is valid and has quota.
+### Flight Search
+
+- Uses the `fast-flights` library for real-time flight data
+- Implements intelligent ranking based on price, duration, and convenience
+- Results are limited to top 10 options for optimal user experience
+- Supports major airport codes and flexible date parsing
+
+### Caching Strategy
+
+- Currency exchange rates cached in Redis for 1 hour
+- Flight search results cached for performance optimization
+- Async Redis operations for non-blocking performance
+
+### Streaming Architecture
+
+- Uses Server-Sent Events (SSE) for real-time updates
+- Maintains workflow state with LangGraph checkpointers
+- Supports multiple concurrent sessions with unique thread IDs
+- Graceful error handling with retry mechanisms
+
+### Performance
+
+- Fully async architecture for maximum throughput
+- Connection pooling for database and external API calls
+- Efficient JSON serialization with Pydantic models
+- Optimized graph execution with parallel node processing
+
+### Security
+
+- Input validation with Pydantic models
+- Rate limiting ready (configurable)
+- Environment-based configuration for sensitive data
+- CORS headers configured for web client integration
